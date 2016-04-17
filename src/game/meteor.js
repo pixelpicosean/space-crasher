@@ -65,6 +65,8 @@ export default class Meteor extends SpriteActor {
   destroy() {
     this.emit('destroy');
     this.remove();
+
+    this.scene.camera.shake(4, 40, 1, false);
   }
 
   receiveDamage() {
