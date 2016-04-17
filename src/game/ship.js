@@ -59,9 +59,9 @@ class Bullet extends AnimatedActor {
 
     this.position.copy(pos);
     this.velocity.copy(dir).multiply(this.speed);
-    this.collisionGroup = GROUPS.DMG;
+    this.collisionGroup = GROUPS.ME_DMG;
     this.collideAgainst = [GROUPS.SOLID, GROUPS.FOE, GROUPS.FOE_DMG];
-    this.collide = this.collide;
+    this.body.collide = this.collide;
     this.body.parent = this;
   }
   update() {
@@ -75,6 +75,7 @@ class Bullet extends AnimatedActor {
 
   collide(other) {
     other.parent.receiveDamager(this.parent.atk);
+    this.parent.remove();
   }
 }
 
@@ -138,19 +139,27 @@ export default class Ship extends SpriteActor {
     // States
     this.weapon = {
       left: new Weapon(this, LEFT).setup(LV1),
-      right: new Weapon(this, RIGHT).setup(LV2),
-      up: new Weapon(this, UP).setup(LV3),
-      down: new Weapon(this, DOWN).setup(LV4),
+      right: new Weapon(this, RIGHT).setup(LV1),
+      up: new Weapon(this, UP).setup(LV1),
+      down: new Weapon(this, DOWN).setup(LV1),
     };
+
+    this.health = 5;
+    this.alive = true;
+    this.invincibleTimer = 0;
 
     // Setup physics
     this.collisionGroup = GROUPS.ME;
     this.velocityLimit.set(20);
     this.damping = 0.85;
 
+    this.body.parent = this;
+
     this.position.set(16, 16);
   }
   update(dt) {
+    if (!this.alive) return;
+
     this.weapon.left.update(dt);
     this.weapon.right.update(dt);
     this.weapon.up.update(dt);
@@ -167,6 +176,10 @@ export default class Ship extends SpriteActor {
     }
     if (keyboard.down('RIGHT')) {
       this.shoot(RIGHT);
+    }
+
+    if (this.invincibleTimer > 0) {
+      this.invincibleTimer -= dt;
     }
   }
 
@@ -191,5 +204,21 @@ export default class Ship extends SpriteActor {
         this.velocity.y = -this.weapon.down.push;
       }
     }
+  }
+
+  receiveDamager(dmg) {
+    if (!this.alive || this.invincibleTimer > 0) return;
+
+    this.health -= dmg;
+    if (this.health <= 0) {
+      this.destroy();
+    }
+    else {
+      this.invincibleTimer = 1000;
+    }
+  }
+  destroy() {
+    this.alive = false;
+    this.remove();
   }
 }

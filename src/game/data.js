@@ -10,9 +10,15 @@ loader.on('complete', () => {
   const sprites = loader.resources['sprites'].textures;
 
   TEXTURES.BG = sprites['backgrounds/1'];
+  TEXTURES.METEORS = [
+    sprites['backgrounds/meteor-1'],
+    sprites['backgrounds/meteor-2'],
+    sprites['backgrounds/meteor-3'],
+    sprites['backgrounds/meteor-4'],
+    sprites['backgrounds/meteor-5'],
+  ];
 
   TEXTURES.SHIP = sprites['ship1'];
-
   TEXTURES.SHOOTS = [
     [sprites['shots/0']],
     [sprites['shots/1']],
@@ -25,11 +31,11 @@ loader.on('complete', () => {
 import { getGroupMask } from 'engine/physics';
 
 export const GROUPS = {
-  SOLID:    getGroupMask(0),
+  SOLID:    getGroupMask(1),
 
-  ME:       getGroupMask(1),
-  ME_DMG:   getGroupMask(2),
+  ME:       getGroupMask(2),
+  ME_DMG:   getGroupMask(3),
 
-  FOE:      getGroupMask(3),
-  FOE_DMG:  getGroupMask(4),
+  FOE:      getGroupMask(4),
+  FOE_DMG:  getGroupMask(5),
 };
