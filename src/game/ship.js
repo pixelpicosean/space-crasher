@@ -5,7 +5,7 @@ import AnimatedActor from 'engine/actors/animated-actor';
 import keyboard from 'engine/keyboard';
 import Vector from 'engine/vector';
 
-import { TEXTURES } from 'game/data';
+import { TEXTURES, GROUPS } from 'game/data';
 
 const LEFT = Vector.create(-1, 0);
 const RIGHT = Vector.create(1, 0);
@@ -51,9 +51,14 @@ class Bullet extends AnimatedActor {
     this.sprite.rotation = dir.angle();
 
     this.speed = 40;
+    this.atk = 1;
 
     this.position.copy(pos);
     this.velocity.copy(dir).multiply(this.speed);
+    this.collisionGroup = GROUPS.DMG;
+    this.collideAgainst = [GROUPS.SOLID, GROUPS.FOE, GROUPS.FOE_DMG];
+    this.collide = this.collide;
+    this.body.parent = this;
   }
   update() {
     if (this.position.x < -this.sprite.width ||
@@ -62,6 +67,10 @@ class Bullet extends AnimatedActor {
       this.position.y > engine.height + this.sprite.height) {
       this.remove();
     }
+  }
+
+  collide(other) {
+    other.parent.receiveDamager(this.parent.atk);
   }
 }
 
@@ -131,7 +140,8 @@ export default class Ship extends SpriteActor {
     };
 
     // Setup physics
-    this.body.velocityLimit.set(20);
+    this.collisionGroup = GROUPS.ME;
+    this.velocityLimit.set(20);
     this.damping = 0.85;
 
     this.position.set(16, 16);

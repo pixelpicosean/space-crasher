@@ -19,3 +19,15 @@ loader.on('complete', () => {
   ];
 
 });
+
+import { getGroupMask } from 'engine/physics';
+
+export const GROUPS = {
+  SOLID:    getGroupMask(0),
+
+  ME:       getGroupMask(1),
+  ME_DMG:   getGroupMask(2),
+
+  FOE:      getGroupMask(3),
+  FOE_DMG:  getGroupMask(4),
+};
