@@ -10,10 +10,13 @@ class Space extends Scene {
   constructor() {
     super();
 
-    this.worldLayer = new PIXI.Container().addTo(this.stage);
-      this.bgLayer = new PIXI.Container().addTo(this.worldLayer);
-      this.actLayer = new PIXI.Container().addTo(this.worldLayer);
+    // Setup layers
+    this.bgLayer = new PIXI.Container().addTo(this.stage);
+    this.actLayer = new PIXI.Container().addTo(this.stage);
     this.uiLayer = new PIXI.Container().addTo(this.stage);
+
+    // Background
+    this.bg = new PIXI.extras.TilingSprite(TEXTURES.BG, 64, 64).addTo(this.bgLayer);
   }
   awake() {
     const s = new Ship().addTo(this, this.actLayer);

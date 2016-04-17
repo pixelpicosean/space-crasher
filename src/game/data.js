@@ -9,6 +9,8 @@ loader.on('complete', () => {
 
   const sprites = loader.resources['sprites'].textures;
 
+  TEXTURES.BG = sprites['backgrounds/1'];
+
   TEXTURES.SHIP = sprites['ship'];
 
   TEXTURES.SHOOTS = [
