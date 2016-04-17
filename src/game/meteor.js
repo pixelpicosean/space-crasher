@@ -3,6 +3,8 @@ import rnd from 'engine/rnd';
 
 import { TEXTURES, GROUPS } from 'game/data';
 
+import effect from './effect';
+
 const SPEED_MIN = 4;
 const SPEED_MAX = 12;
 const PI_2 = Math.PI * 2;
@@ -65,8 +67,6 @@ export default class Meteor extends SpriteActor {
   destroy() {
     this.emit('destroy');
     this.remove();
-
-    this.scene.camera.shake(4, 40, 1, false);
   }
 
   receiveDamage() {
@@ -99,6 +99,15 @@ export default class Meteor extends SpriteActor {
         offsetY = rnd.between(-8, 8);
         new Meteor(this.position.x + offsetX, this.position.y + offsetY, newLv)
           .addTo(this.scene, this.parent);
+      }
+
+      // Shake screen
+      this.scene.camera.shake(4, 40, 1, false);
+
+      // Random explosion
+      if (rnd.frac() > 0.4) {
+        effect(2, this.position.x, this.position.y)
+          .addTo(this.parent.parent);
       }
 
       this.destroy();
