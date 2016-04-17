@@ -5,6 +5,8 @@ import AnimatedActor from 'engine/actors/animated-actor';
 import keyboard from 'engine/keyboard';
 import Vector from 'engine/vector';
 
+import Health from 'behaviors/health';
+
 import { TEXTURES, GROUPS } from 'game/data';
 
 const LEFT = Vector.create(-1, 0);
@@ -91,7 +93,7 @@ class Bullet extends AnimatedActor {
   }
 
   collide(other) {
-    other.parent.receiveDamager(this.parent.atk);
+    other.parent.receiveDamage(this.parent.atk);
     this.parent.remove();
 
     // Effect
@@ -165,10 +167,6 @@ export default class Ship extends SpriteActor {
       down: new Weapon(this, DOWN).setup(LV1),
     };
 
-    this.health = 5;
-    this.alive = true;
-    this.invincibleTimer = 0;
-
     // Setup physics
     this.collisionGroup = GROUPS.ME;
     this.velocityLimit.set(20);
@@ -178,9 +176,21 @@ export default class Ship extends SpriteActor {
 
     this.position.set(16, 16);
   }
-  update(dt) {
-    if (!this.alive) return;
+  addTo(scene, layer) {
+    super.addTo(scene, layer);
 
+    new Health({
+        startHealth: 10,
+        maxHealth: 10,
+        damageInvincibleTime: 1000,
+      })
+      .addTo(this, scene)
+      .once('kill', this.remove, this)
+      .activate();
+
+    return this;
+  }
+  update(dt) {
     this.weapon.left.update(dt);
     this.weapon.right.update(dt);
     this.weapon.up.update(dt);
@@ -197,10 +207,6 @@ export default class Ship extends SpriteActor {
     }
     if (keyboard.down('RIGHT')) {
       this.shoot(RIGHT);
-    }
-
-    if (this.invincibleTimer > 0) {
-      this.invincibleTimer -= dt;
     }
   }
 
@@ -225,21 +231,5 @@ export default class Ship extends SpriteActor {
         this.velocity.y = -this.weapon.down.push;
       }
     }
-  }
-
-  receiveDamager(dmg) {
-    if (!this.alive || this.invincibleTimer > 0) return;
-
-    this.health -= dmg;
-    if (this.health <= 0) {
-      this.destroy();
-    }
-    else {
-      this.invincibleTimer = 1000;
-    }
-  }
-  destroy() {
-    this.alive = false;
-    this.remove();
   }
 }

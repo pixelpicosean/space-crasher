@@ -59,7 +59,7 @@ export default class Meteor extends SpriteActor {
     if (other.collisionGroup === GROUPS.SOLID) {
       return true;
     }
-    other.parent.receiveDamager(this.parent.atk);
+    other.parent.receiveDamage(this.parent.atk);
   }
 
   destroy() {
@@ -67,7 +67,7 @@ export default class Meteor extends SpriteActor {
     this.remove();
   }
 
-  receiveDamager() {
+  receiveDamage() {
     if (!this.alive) return;
 
     this.health -= 1;
