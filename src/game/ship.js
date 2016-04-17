@@ -45,6 +45,23 @@ const LV4 = {
   push: 40,
 };
 
+const FX_ANIMS = [
+  [0, 1, 2, 3, 4, 5],
+  [0, 1, 2, 3, 4, 5],
+  [0, 1, 2, 3, 4, 5, 6, 7],
+];
+const effect = (idx, x, y) => {
+  const spr = new PIXI.extras.AnimatedSprite(TEXTURES.FX[idx]);
+  spr.addAnim('a', FX_ANIMS[idx], {
+    speed: 12,
+    loop: false,
+  });
+  spr.play('a').once('finish', spr.remove, spr);
+  spr.anchor.set(0.5);
+  spr.position.set(x, y);
+  return spr;
+};
+
 class Bullet extends AnimatedActor {
   constructor(tex, pos, dir, speed) {
     super(tex, 'Box');
@@ -76,6 +93,10 @@ class Bullet extends AnimatedActor {
   collide(other) {
     other.parent.receiveDamager(this.parent.atk);
     this.parent.remove();
+
+    // Effect
+    effect(1, this.position.x, this.position.y)
+      .addTo(this.parent.parent);
   }
 }
 
