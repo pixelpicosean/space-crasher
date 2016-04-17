@@ -1,9 +1,9 @@
 import engine from 'engine/core';
 import PIXI from 'engine/pixi';
-import SpriteActor from 'engine/actors/sprite-actor';
 import AnimatedActor from 'engine/actors/animated-actor';
 import keyboard from 'engine/keyboard';
 import Vector from 'engine/vector';
+import Timer from 'engine/timer';
 
 import Health from 'behaviors/health';
 
@@ -155,9 +155,12 @@ class Weapon {
   }
 }
 
-export default class Ship extends SpriteActor {
+export default class Ship extends AnimatedActor {
   constructor() {
     super(TEXTURES.SHIP, 'Circle');
+
+    this.addAnim('a', [0]);
+    this.addAnim('flash', [0, 1], { speed: 8 });
 
     // States
     this.weapon = {
@@ -179,13 +182,16 @@ export default class Ship extends SpriteActor {
   addTo(scene, layer) {
     super.addTo(scene, layer);
 
+    this.play('a');
+
     new Health({
         startHealth: 10,
         maxHealth: 10,
-        damageInvincibleTime: 1000,
+        damageInvincibleTime: 2000,
       })
       .addTo(this, scene)
       .once('kill', this.remove, this)
+      .on('receiveDamage', this.beginFlash, this)
       .activate();
 
     return this;
@@ -231,5 +237,12 @@ export default class Ship extends SpriteActor {
         this.velocity.y = -this.weapon.down.push;
       }
     }
+  }
+  beginFlash() {
+    this.play('flash');
+    Timer.later(this.Health.damageInvincibleTime, this.endFlash, this);
+  }
+  endFlash() {
+    this.play('a');
   }
 }

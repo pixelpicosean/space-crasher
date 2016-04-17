@@ -18,7 +18,10 @@ loader.on('complete', () => {
     sprites['backgrounds/meteor-5'],
   ];
 
-  TEXTURES.SHIP = sprites['ship1'];
+  TEXTURES.SHIP = [
+    sprites['ship1'],
+    sprites['ship1-flash'],
+  ];
   TEXTURES.SHOOTS = [
     [sprites['shots/0']],
     [sprites['shots/1']],

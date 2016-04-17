@@ -18,7 +18,7 @@
 },
 "backgrounds/meteor-2":
 {
-	"frame": {"x":457,"y":2,"w":11,"h":10},
+	"frame": {"x":457,"y":33,"w":11,"h":10},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":11,"h":10},
@@ -34,7 +34,7 @@
 },
 "backgrounds/meteor-4":
 {
-	"frame": {"x":436,"y":2,"w":13,"h":14},
+	"frame": {"x":457,"y":2,"w":13,"h":14},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":14},
@@ -82,7 +82,7 @@
 },
 "hud/life-rectangle":
 {
-	"frame": {"x":457,"y":47,"w":6,"h":14},
+	"frame": {"x":447,"y":2,"w":6,"h":14},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":14},
@@ -106,7 +106,7 @@
 },
 "ship copy":
 {
-	"frame": {"x":436,"y":25,"w":13,"h":13},
+	"frame": {"x":457,"y":18,"w":13,"h":13},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":13},
@@ -114,7 +114,15 @@
 },
 "ship":
 {
-	"frame": {"x":457,"y":36,"w":9,"h":9},
+	"frame": {"x":436,"y":13,"w":9,"h":9},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":9},
+	"sourceSize": {"w":9,"h":9}
+},
+"ship1-flash":
+{
+	"frame": {"x":436,"y":2,"w":9,"h":9},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":9},
@@ -122,7 +130,7 @@
 },
 "ship1":
 {
-	"frame": {"x":457,"y":36,"w":9,"h":9},
+	"frame": {"x":436,"y":13,"w":9,"h":9},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":9},
@@ -130,7 +138,7 @@
 },
 "ship2":
 {
-	"frame": {"x":457,"y":25,"w":9,"h":9},
+	"frame": {"x":457,"y":56,"w":9,"h":9},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":9},
@@ -138,7 +146,7 @@
 },
 "ship3":
 {
-	"frame": {"x":457,"y":14,"w":9,"h":9},
+	"frame": {"x":457,"y":45,"w":9,"h":9},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":9},
@@ -181,8 +189,8 @@
 	"version": "1.0",
 	"image": "sprites.png",
 	"format": "RGBA8888",
-	"size": {"w":470,"h":68},
+	"size": {"w":472,"h":68},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:a8ae5a3db51995888b40582d05e07acf:1/1$"
+	"smartupdate": "$TexturePacker:SmartUpdate:0776dbfa367c0eff5fb9555c2f08a8f2:1/1$"
 }
 }
