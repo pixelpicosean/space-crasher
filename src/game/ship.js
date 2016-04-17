@@ -12,45 +12,49 @@ const RIGHT = Vector.create(1, 0);
 const UP = Vector.create(0, -1);
 const DOWN = Vector.create(0, 1);
 
+/* bullet */
 const LV1 = {
   texture: 0,
   speed: 30,
-  cooldown: 160,
-  offset: 8,
+  cooldown: 180,
+  offset: 6,
   push: 20,
 };
+/* lazer */
 const LV2 = {
   texture: 1,
-  speed: 36,
+  speed: 80,
   cooldown: 200,
   offset: 8,
-  push: 30,
+  push: 10,
 };
+/* missile */
 const LV3 = {
   texture: 2,
-  speed: 20,
-  cooldown: 300,
+  speed: 16,
+  cooldown: 700,
   offset: 8,
   push: 16,
 };
+/* super */
 const LV4 = {
   texture: 3,
   speed: 24,
-  cooldown: 200,
-  offset: 8,
-  push: 36,
+  cooldown: 300,
+  offset: 5,
+  push: 40,
 };
 
 class Bullet extends AnimatedActor {
-  constructor(tex, pos, dir) {
+  constructor(tex, pos, dir, speed) {
     super(tex, 'Box');
-    this.addAnim('a', tex.length === 1 ? [0] : [0, 1, 2], {
-      speed: 6,
+    this.addAnim('a', tex.length === 1 ? [0] : [2, 1, 0], {
+      speed: 8,
     });
     this.play('a');
     this.sprite.rotation = dir.angle();
 
-    this.speed = 40;
+    this.speed = speed || 40;
     this.atk = 1;
 
     this.position.copy(pos);
@@ -61,10 +65,10 @@ class Bullet extends AnimatedActor {
     this.body.parent = this;
   }
   update() {
-    if (this.position.x < -this.sprite.width ||
-      this.position.x > engine.width + this.sprite.width ||
-      this.position.y < -this.sprite.height ||
-      this.position.y > engine.height + this.sprite.height) {
+    if (this.position.x < this.scene.left - this.sprite.width ||
+      this.position.x > this.scene.right + this.sprite.width ||
+      this.position.y < this.scene.top - this.sprite.height ||
+      this.position.y > this.scene.bottom + this.sprite.height) {
       this.remove();
     }
   }
@@ -119,7 +123,7 @@ class Weapon {
     this.emitPoint
       .copy(this.dir).multiply(this.offset)
       .add(this.ship.position);
-    new Bullet(TEXTURES.SHOOTS[this.shotTex], this.emitPoint, this.dir)
+    new Bullet(TEXTURES.SHOOTS[this.shotTex], this.emitPoint, this.dir, this.speed)
       .addTo(this.ship.scene, this.ship.scene.actLayer);
 
     // Request a push back

@@ -11,13 +11,13 @@ loader.on('complete', () => {
 
   TEXTURES.BG = sprites['backgrounds/1'];
 
-  TEXTURES.SHIP = sprites['ship'];
+  TEXTURES.SHIP = sprites['ship1'];
 
   TEXTURES.SHOOTS = [
     [sprites['shots/0']],
     [sprites['shots/1']],
-    filmstrip(sprites['shots/2'], 16, 7),
-    [sprites['shots/3']],
+    filmstrip(sprites['shots/2'], 16, 5),
+    filmstrip(sprites['shots/3'], 9, 8),
   ];
 
 });
