@@ -84,10 +84,10 @@ class Bullet extends AnimatedActor {
     this.body.parent = this;
   }
   update() {
-    if (this.position.x < this.scene.left - this.sprite.width ||
-      this.position.x > this.scene.right + this.sprite.width ||
-      this.position.y < this.scene.top - this.sprite.height ||
-      this.position.y > this.scene.bottom + this.sprite.height) {
+    if (this.position.x < this.scene.camera.left - this.sprite.width ||
+      this.position.x > this.scene.camera.right + this.sprite.width ||
+      this.position.y < this.scene.camera.top - this.sprite.height ||
+      this.position.y > this.scene.camera.bottom + this.sprite.height) {
       this.remove();
     }
   }
