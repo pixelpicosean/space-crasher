@@ -9,6 +9,8 @@ import Health from 'behaviors/health';
 
 import { TEXTURES, GROUPS } from 'game/data';
 
+import effect from './effect';
+
 const LEFT = Vector.create(-1, 0);
 const RIGHT = Vector.create(1, 0);
 const UP = Vector.create(0, -1);
@@ -45,23 +47,6 @@ const LV4 = {
   cooldown: 300,
   offset: 5,
   push: 40,
-};
-
-const FX_ANIMS = [
-  [0, 1, 2, 3, 4, 5],
-  [0, 1, 2, 3, 4, 5],
-  [0, 1, 2, 3, 4, 5, 6, 7],
-];
-const effect = (idx, x, y) => {
-  const spr = new PIXI.extras.AnimatedSprite(TEXTURES.FX[idx]);
-  spr.addAnim('a', FX_ANIMS[idx], {
-    speed: 12,
-    loop: false,
-  });
-  spr.play('a').once('finish', spr.remove, spr);
-  spr.anchor.set(0.5);
-  spr.position.set(x, y);
-  return spr;
 };
 
 class Bullet extends AnimatedActor {
