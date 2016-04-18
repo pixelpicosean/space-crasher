@@ -26,6 +26,7 @@ class Space extends Scene {
 
     // States
     this.meteorCount = 0;
+    this.meteors = [];
 
     // Setup layers
     this.bgLayer = new PIXI.Container().addTo(this.stage);
@@ -80,6 +81,7 @@ class Space extends Scene {
     for (let i = 0; i < this.meteors.length; i++) {
       this.meteors[i].remove();
     }
+    this.meteors.length = 0;
   }
 
   spawnMeteor() {
