@@ -165,6 +165,10 @@ class HealthHUD {
   }
   addTo(scene) {
     this.sprite.addTo(scene.uiLayer);
+    return this;
+  }
+  remove() {
+    this.sprite.remove();
   }
 }
 
@@ -196,12 +200,9 @@ export default class Ship extends AnimatedActor {
         return true;
       }
     };
-
-    this.position.set(16, 16);
   }
   addTo(scene, layer) {
     super.addTo(scene, layer);
-
     this.play('a');
 
     new Health({
@@ -210,16 +211,18 @@ export default class Ship extends AnimatedActor {
         damageInvincibleTime: 2000,
       })
       .addTo(this, scene)
-      .once('kill', this.remove, this)
+      .on('kill', this.destroy, this)
       .on('receiveDamage', this.beginFlash, this)
       .activate();
 
-    new HealthHUD(this.Health)
+    this.hud = new HealthHUD(this.Health)
       .addTo(this.scene);
 
     return this;
   }
   update(dt) {
+    if (this.health <= 0) return;
+
     this.weapon.left.update(dt);
     this.weapon.right.update(dt);
     this.weapon.up.update(dt);
@@ -269,5 +272,15 @@ export default class Ship extends AnimatedActor {
   }
   endFlash() {
     this.play('a');
+  }
+
+  destroy() {
+    effect(2, this.position.x, this.position.y);
+
+    Timer.later(1000, () => {
+      this.hud.remove();
+      this.remove();
+      this.scene.shipDestroyed();
+    });
   }
 }

@@ -48,6 +48,10 @@ export default class Meteor extends SpriteActor {
     this.body.collide = this.collide;
     this.body.parent = this;
   }
+  addTo(scene, layer) {
+    scene.meteors.push(this);
+    return super.addTo(scene, layer);
+  }
   update() {
     if (this.position.x < this.scene.left - this.sprite.width ||
       this.position.x > this.scene.right + this.sprite.width ||

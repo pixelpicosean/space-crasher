@@ -4,11 +4,14 @@ import PIXI from 'engine/pixi';
 import rnd from 'engine/rnd';
 import Timer from 'engine/timer';
 import Camera from 'engine/camera';
+import { session, persistent } from 'engine/storage';
 
 import { TEXTURES } from 'game/data';
 
 import Meteor from 'game/meteor';
 import Ship from 'game/ship';
+
+import GameOverPanel from 'game/game-over';
 
 const SPACE_WIDTH = 128;
 const SPACE_HEIGHT = 128;
@@ -54,24 +57,37 @@ class Space extends Scene {
     Object.defineProperty(this, 'bottom', {
       get: function() { return SPACE_HEIGHT * 0.5 }
     });
+
+    // HUD
+    this.gameOverPanel = new GameOverPanel().addTo(this);
   }
   awake() {
+    session.set('score', 0);
+    session.set('time', Timer.now);
+
+    // Ship
+    this.ship = new Ship().addTo(this, this.actLayer);
+    this.camera.setTarget(this.ship.sprite);
+
+    // Start to spawn meteors
     this.meteorCount = 0;
-
-    const s = new Ship().addTo(this, this.actLayer);
-    this.camera.setTarget(s.sprite);
-
     this.spawnMeteor();
   }
   update() {
     this.bg.tilePosition.copy(this.actLayer.pivot).multiply(-1);
   }
+  freeze() {
+    for (let i = 0; i < this.meteors.length; i++) {
+      this.meteors[i].remove();
+    }
+  }
 
   spawnMeteor() {
     if (this.meteorCount < METEOR_MAX) {
-      new Meteor(rnd.between(this.left, this.right), rnd.between(this.top, this.bottom))
+      let m = new Meteor(rnd.between(this.left, this.right), rnd.between(this.top, this.bottom))
         .addTo(this, this.actLayer)
         .once('destroy', this.meteorDestroyed, this);
+      this.meteors.push(m);
 
       this.meteorCount += 1;
     }
@@ -80,6 +96,12 @@ class Space extends Scene {
   }
   meteorDestroyed() {
     this.meteorCount -= 1;
+    session.set('score', session.get('score') + 1);
+  }
+
+  shipDestroyed() {
+    this.camera.setTarget(null);
+    this.gameOverPanel.show();
   }
 }
 

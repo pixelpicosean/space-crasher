@@ -44,6 +44,7 @@ loader.on('complete', () => {
   TEXTURES.HUD = {
     HEALTH_BOX: sprites['hud/life-box'],
     HEALTH_SEG: sprites['hud/life-rectangle'],
+    PANEL: sprites['hud/panel'],
   };
 
 });
