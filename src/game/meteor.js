@@ -69,7 +69,7 @@ export default class Meteor extends SpriteActor {
   }
 
   destroy() {
-    this.emit('destroy');
+    this.emit('destroy', this.lv);
     this.remove();
   }
 

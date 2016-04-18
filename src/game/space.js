@@ -62,10 +62,17 @@ class Space extends Scene {
 
     // HUD
     this.gameOverPanel = new GameOverPanel().addTo(this);
+
+    this.score = new PIXI.extras.BitmapText('00000', {
+      font: '8px KenPixel',
+    }).addTo(this.uiLayer);
+    this.score.position.set(36, -1);
   }
   awake() {
     session.set('score', 0);
     session.set('time', Timer.now);
+
+    session.on('score', this.updateScore, this);
 
     // Ship
     this.ship = new Ship().addTo(this, this.actLayer);
@@ -83,6 +90,8 @@ class Space extends Scene {
       this.meteors[i].remove();
     }
     this.meteors.length = 0;
+
+    session.off('score', this.updateScore, this);
   }
 
   spawnMeteor() {
@@ -97,9 +106,9 @@ class Space extends Scene {
 
     Timer.later(rnd.between(METEOR_SPAWN_TIME_MIN, METEOR_SPAWN_TIME_MAX), this.spawnMeteor, this);
   }
-  meteorDestroyed() {
+  meteorDestroyed(lv) {
     this.meteorCount -= 1;
-    session.set('score', session.get('score') + 1);
+    session.set('score', session.get('score') + lv * 10);
 
     audio.sounds['explo'].play();
   }
@@ -110,6 +119,16 @@ class Space extends Scene {
 
     audio.sounds['death'].play();
   }
+
+  updateScore(s) {
+    this.score.text = `${paddy(s, 5)}`;
+  }
+}
+
+function paddy(n, p, c) {
+  let pad_char = typeof c !== 'undefined' ? c : '0';
+  let pad = new Array(1 + p).join(pad_char);
+  return (pad + n).slice(-pad.length);
 }
 
 engine.addScene('Space', Space);

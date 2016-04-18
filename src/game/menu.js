@@ -24,7 +24,7 @@ class Menu extends Scene {
     text.position.set(30, 54);
 
     // Start bgm
-    audio.sounds['bgm'].play();
+    audio.sounds['bgm'].loop(true).play();
   }
   start() {
     engine.setScene('Space');
