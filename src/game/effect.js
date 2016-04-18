@@ -6,11 +6,12 @@ const FX_ANIMS = [
   [0, 1, 2, 3, 4, 5],
   [0, 1, 2, 3, 4, 5],
   [0, 1, 2, 3, 4, 5, 6, 7],
+  [0, 1, 2, 3, 4, 5],
 ];
 export default (idx, x, y) => {
   const spr = new PIXI.extras.AnimatedSprite(TEXTURES.FX[idx]);
   spr.addAnim('a', FX_ANIMS[idx], {
-    speed: 12,
+    speed: 14,
     loop: false,
   });
   spr.play('a').once('finish', spr.remove, spr);

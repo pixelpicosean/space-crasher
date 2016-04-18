@@ -49,19 +49,23 @@ const LV4 = {
   push: 40,
 };
 
+const SHOT_FX_MAP = [3, 0, 2, 1];
+
 class Bullet extends AnimatedActor {
-  constructor(tex, pos, dir, speed) {
+  constructor(texId, pos, dir, speed) {
+    let tex = TEXTURES.SHOOTS[texId];
     super(tex, 'Box');
-    this.addAnim('a', tex.length === 1 ? [0] : [2, 1, 0], {
-      speed: 8,
-    });
+
+    this.addAnim('a', tex.length === 1 ? [0] : [2, 1, 0], { speed: 8 });
     this.play('a');
-    this.sprite.rotation = dir.angle();
 
     this.speed = speed || 40;
     this.atk = 1;
 
+    this.shotType = texId;
+
     this.position.copy(pos);
+    this.rotation = dir.angle();
     this.velocity.copy(dir).multiply(this.speed);
     this.collisionGroup = GROUPS.ME_DMG;
     this.collideAgainst = [GROUPS.SOLID, GROUPS.FOE, GROUPS.FOE_DMG];
@@ -82,7 +86,7 @@ class Bullet extends AnimatedActor {
     this.parent.remove();
 
     // Effect
-    effect(1, this.position.x, this.position.y)
+    effect(SHOT_FX_MAP[this.parent.shotType], this.position.x, this.position.y)
       .addTo(this.parent.parent);
   }
 }
@@ -132,7 +136,7 @@ class Weapon {
     this.emitPoint
       .copy(this.dir).multiply(this.offset)
       .add(this.ship.position);
-    new Bullet(TEXTURES.SHOOTS[this.shotTex], this.emitPoint, this.dir, this.speed)
+    new Bullet(this.shotTex, this.emitPoint, this.dir, this.speed)
       .addTo(this.ship.scene, this.ship.scene.actLayer);
 
     // Request a push back
