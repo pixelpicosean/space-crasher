@@ -35,15 +35,19 @@ Keyboard.prototype.down = function down(key) {
   @private
 **/
 Keyboard.prototype._keydown = function _keydown(event) {
+  event.preventDefault();
+
   if (!Keyboard.keys[event.keyCode]) {
     // Unknown key
     Keyboard.keys[event.keyCode] = event.keyCode;
   }
 
-  if (this._keysDown[Keyboard.keys[event.keyCode]]) return;
+  if (this._keysDown[Keyboard.keys[event.keyCode]]) return false;
 
   this._keysDown[Keyboard.keys[event.keyCode]] = true;
   this.emit('keydown', Keyboard.keys[event.keyCode], this.down('SHIFT'), this.down('CTRL'), this.down('ALT'));
+
+  return false;
 };
 
 /**
@@ -52,8 +56,12 @@ Keyboard.prototype._keydown = function _keydown(event) {
   @private
 **/
 Keyboard.prototype._keyup = function _keyup(event) {
+  event.preventDefault();
+
   this._keysDown[Keyboard.keys[event.keyCode]] = false;
   this.emit('keyup', Keyboard.keys[event.keyCode]);
+
+  return false;
 };
 
 /**

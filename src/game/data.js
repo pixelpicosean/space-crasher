@@ -1,8 +1,15 @@
 import loader from 'engine/loader';
+import audio from 'engine/audio';
 import filmstrip from 'engine/tilemap/filmstrip';
 
 loader.addAsset('KenPixel.fnt');
 loader.addAsset('sprites.json', 'sprites');
+
+audio.addSound(['fire.ogg', 'fire.m4a'], 'fire');
+audio.addSound(['death.ogg', 'death.m4a'], 'death');
+audio.addSound(['explo.ogg', 'explo.m4a'], 'explo');
+audio.addSound(['hit.ogg', 'hit.m4a'], 'hit');
+audio.addSound(['shoot.ogg', 'shoot.m4a'], 'shoot');
 
 export const TEXTURES = {};
 loader.on('complete', () => {

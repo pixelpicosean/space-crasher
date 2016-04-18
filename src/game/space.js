@@ -5,6 +5,7 @@ import rnd from 'engine/rnd';
 import Timer from 'engine/timer';
 import Camera from 'engine/camera';
 import { session, persistent } from 'engine/storage';
+import audio from 'engine/audio';
 
 import { TEXTURES } from 'game/data';
 
@@ -99,11 +100,15 @@ class Space extends Scene {
   meteorDestroyed() {
     this.meteorCount -= 1;
     session.set('score', session.get('score') + 1);
+
+    audio.sounds['explo'].play();
   }
 
   shipDestroyed() {
     this.camera.setTarget(null);
     this.gameOverPanel.show();
+
+    audio.sounds['death'].play();
   }
 }
 

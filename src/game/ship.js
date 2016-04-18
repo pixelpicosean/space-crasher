@@ -4,6 +4,7 @@ import AnimatedActor from 'engine/actors/animated-actor';
 import keyboard from 'engine/keyboard';
 import Vector from 'engine/vector';
 import Timer from 'engine/timer';
+import audio from 'engine/audio'
 
 import Health from 'behaviors/health';
 
@@ -88,6 +89,8 @@ class Bullet extends AnimatedActor {
     // Effect
     effect(SHOT_FX_MAP[this.parent.shotType], this.position.x, this.position.y)
       .addTo(this.parent.parent);
+
+    audio.sounds['hit'].play();
   }
 }
 
@@ -138,6 +141,8 @@ class Weapon {
       .add(this.ship.position);
     new Bullet(this.shotTex, this.emitPoint, this.dir, this.speed)
       .addTo(this.ship.scene, this.ship.scene.actLayer);
+
+    audio.sounds['shoot'].play();
 
     // Request a push back
     return true;
