@@ -47,6 +47,11 @@ loader.on('complete', () => {
     PANEL: sprites['hud/panel'],
   };
 
+  TEXTURES.MENU = {
+    TITLE: sprites['title'],
+    TITLE_BTN: sprites['title-btn'],
+  };
+
 });
 
 import { getGroupMask } from 'engine/physics';
