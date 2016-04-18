@@ -160,11 +160,18 @@ export default class Ship extends AnimatedActor {
     };
 
     // Setup physics
-    this.collisionGroup = GROUPS.ME;
+    this.body.parent = this;
     this.velocityLimit.set(20);
     this.damping = 0.85;
 
-    this.body.parent = this;
+    this.collisionGroup = GROUPS.ME;
+    this.collideAgainst = [GROUPS.SOLID];
+    this.body.collide = (other, res) => {
+      if (other.collisionGroup === GROUPS.SOLID) {
+        this.velocity.add(res.overlapN.clone().multiply(8));
+        return true;
+      }
+    };
 
     this.position.set(16, 16);
   }

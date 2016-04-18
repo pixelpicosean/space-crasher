@@ -16,7 +16,7 @@ export default class Meteor extends SpriteActor {
     const level = (lv < 0) ? rnd.weightedPick(LEVELS) : lv;
     const tex = TEXTURES.METEORS[5 - level];
 
-    super(tex, 'Box');
+    super(tex, 'Circle');
 
     this.alive = true;
 
