@@ -36,7 +36,7 @@ export default {
    * Whether pause the game (timer and scene)
    * when page is hidden
    */
-  pauseOnHide: false,
+  pauseOnHide: true,
 
   /**
    * Whether show a image or text to tell players to rotate device
