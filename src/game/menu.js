@@ -1,6 +1,7 @@
 import engine from 'engine/core';
 import Scene from 'engine/scene';
 import PIXI from 'engine/pixi';
+import audio from 'engine/audio';
 
 import { TEXTURES } from 'game/data';
 
@@ -21,6 +22,9 @@ class Menu extends Scene {
       font: '8px KenPixel',
     }).addTo(this.stage);
     text.position.set(30, 54);
+
+    // Start bgm
+    audio.sounds['bgm'].play();
   }
   start() {
     engine.setScene('Space');

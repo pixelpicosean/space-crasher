@@ -10,6 +10,7 @@ audio.addSound(['death.ogg', 'death.m4a'], 'death');
 audio.addSound(['explo.ogg', 'explo.m4a'], 'explo');
 audio.addSound(['hit.ogg', 'hit.m4a'], 'hit');
 audio.addSound(['shoot.ogg', 'shoot.m4a'], 'shoot');
+audio.addSound(['bgm.ogg', 'bgm.m4a'], 'bgm');
 
 export const TEXTURES = {};
 loader.on('complete', () => {
