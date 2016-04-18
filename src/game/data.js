@@ -9,7 +9,10 @@ loader.on('complete', () => {
 
   const sprites = loader.resources['sprites'].textures;
 
+  // Background
   TEXTURES.BG = sprites['backgrounds/1'];
+
+  // Actors
   TEXTURES.METEORS = [
     sprites['backgrounds/meteor-1'],
     sprites['backgrounds/meteor-2'],
@@ -29,12 +32,19 @@ loader.on('complete', () => {
     filmstrip(sprites['shots/3'], 9, 8),
   ];
 
+  // Eye candy
   TEXTURES.FX = [
     filmstrip(sprites['effects/2'], 23, 22),
     filmstrip(sprites['effects/3'], 16, 16),
     filmstrip(sprites['effects/fx-7'], 41, 36),
     filmstrip(sprites['effects/4'], 16, 16),
   ];
+
+  // HUD
+  TEXTURES.HUD = {
+    HEALTH_BOX: sprites['hud/life-box'],
+    HEALTH_SEG: sprites['hud/life-rectangle'],
+  };
 
 });
 

@@ -144,6 +144,28 @@ class Weapon {
   }
 }
 
+class HealthHUD {
+  constructor(healthBhv) {
+    this.sprite = new PIXI.Sprite(TEXTURES.HUD.HEALTH_BOX);
+    let i, seg;
+    for (i = 0; i < healthBhv.maxHealth; i++) {
+      seg = new PIXI.Sprite(TEXTURES.HUD.HEALTH_SEG).addTo(this.sprite);
+      seg.position.set(i * 2, 0).add(4, 3);
+    }
+    healthBhv.on('health', (v) => {
+      for (i = 0; i < v; i++) {
+        this.sprite.children[i].visible = true;
+      }
+      for (i = v; i < healthBhv.maxHealth; i++) {
+        this.sprite.children[i].visible = false;
+      }
+    });
+  }
+  addTo(scene) {
+    this.sprite.addTo(scene.uiLayer);
+  }
+}
+
 export default class Ship extends AnimatedActor {
   constructor() {
     super(TEXTURES.SHIP, 'Circle');
@@ -181,14 +203,17 @@ export default class Ship extends AnimatedActor {
     this.play('a');
 
     new Health({
-        startHealth: 10,
-        maxHealth: 10,
+        startHealth: 12,
+        maxHealth: 12,
         damageInvincibleTime: 2000,
       })
       .addTo(this, scene)
       .once('kill', this.remove, this)
       .on('receiveDamage', this.beginFlash, this)
       .activate();
+
+    new HealthHUD(this.Health)
+      .addTo(this.scene);
 
     return this;
   }
