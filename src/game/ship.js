@@ -147,10 +147,12 @@ class Weapon {
 class HealthHUD {
   constructor(healthBhv) {
     this.sprite = new PIXI.Sprite(TEXTURES.HUD.HEALTH_BOX);
+    this.sprite.position.set(1, 1);
+
     let i, seg;
     for (i = 0; i < healthBhv.maxHealth; i++) {
       seg = new PIXI.Sprite(TEXTURES.HUD.HEALTH_SEG).addTo(this.sprite);
-      seg.position.set(i * 2, 0).add(4, 3);
+      seg.position.set(i * 2, 0).add(3, 3);
     }
     healthBhv.on('health', (v) => {
       for (i = 0; i < v; i++) {
