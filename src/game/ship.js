@@ -237,6 +237,8 @@ export default class Ship extends AnimatedActor {
   beginFlash() {
     this.play('flash');
     Timer.later(this.Health.damageInvincibleTime, this.endFlash, this);
+
+    this.scene.camera.shake(4, 40, 2, false);
   }
   endFlash() {
     this.play('a');
