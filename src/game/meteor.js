@@ -1,4 +1,4 @@
-import SpriteActor from 'engine/actors/sprite-actor';
+import Actor from 'engine/actor';
 import rnd from 'engine/rnd';
 
 import { TEXTURES, GROUPS } from 'game/data';
@@ -11,12 +11,17 @@ const PI_2 = Math.PI * 2;
 
 const LEVELS = [5, 4, 3, 2, 1];
 
-export default class Meteor extends SpriteActor {
-  constructor(x, y, lv = -1) {
+export default class Meteor extends Actor {
+  canEverTick = true;
+
+  constructor({ lv = -1 }) {
+    super();
+
     const level = (lv < 0) ? rnd.weightedPick(LEVELS) : lv;
     const tex = TEXTURES.METEORS[5 - level];
 
-    super(tex, 'Circle');
+    this.initSprite(tex);
+    this.initBody({ shape: 'Circle' });
 
     this.alive = true;
 
@@ -41,16 +46,13 @@ export default class Meteor extends SpriteActor {
         break;
     }
 
-    this.position.set(x, y);
-    this.velocity.set(this.speed, 0).rotate(rnd.realInRange(0, PI_2));
-    this.collisionGroup = GROUPS.SOLID;
-    this.collideAgainst = [GROUPS.SOLID, GROUPS.FOE, GROUPS.ME];
+    this.body.collisionGroup = GROUPS.SOLID;
+    this.body.collideAgainst = [GROUPS.SOLID, GROUPS.FOE, GROUPS.ME];
     this.body.collide = this.collide;
-    this.body.parent = this;
   }
-  addTo(scene, layer) {
-    scene.meteors.push(this);
-    return super.addTo(scene, layer);
+  prepare() {
+    this.body.velocity.set(this.speed, 0).rotate(rnd.realInRange(0, PI_2));
+    this.scene.meteors.push(this);
   }
   update() {
     if (this.position.x < this.scene.left - this.sprite.width ||
@@ -96,13 +98,11 @@ export default class Meteor extends SpriteActor {
 
         offsetX = rnd.between(-8, 8);
         offsetY = rnd.between(-8, 8);
-        new Meteor(this.position.x + offsetX, this.position.y + offsetY, newLv)
-          .addTo(this.scene, this.parent);
+        this.scene.spawnActor(Meteor, this.position.x + offsetX, this.position.y + offsetY, 'actLayer', { lv: newLv });
 
         offsetX = rnd.between(-8, 8);
         offsetY = rnd.between(-8, 8);
-        new Meteor(this.position.x + offsetX, this.position.y + offsetY, newLv)
-          .addTo(this.scene, this.parent);
+        this.scene.spawnActor(Meteor, this.position.x + offsetX, this.position.y + offsetY, 'actLayer', { lv: newLv });
       }
 
       // Shake screen
@@ -111,7 +111,7 @@ export default class Meteor extends SpriteActor {
       // Random explosion
       if (rnd.frac() > 0.4) {
         effect(2, this.position.x, this.position.y)
-          .addTo(this.parent.parent);
+          .addTo(this.parent.sprite.parent);
       }
 
       this.destroy();

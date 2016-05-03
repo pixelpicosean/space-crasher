@@ -1,6 +1,6 @@
 import engine from 'engine/core';
 import PIXI from 'engine/pixi';
-import AnimatedActor from 'engine/actors/animated-actor';
+import Actor from 'engine/actor';
 import keyboard from 'engine/keyboard';
 import Vector from 'engine/vector';
 import Timer from 'engine/timer';
@@ -52,26 +52,36 @@ const LV4 = {
 
 const SHOT_FX_MAP = [3, 0, 2, 1];
 
-class Bullet extends AnimatedActor {
-  constructor(texId, pos, dir, speed) {
-    let tex = TEXTURES.SHOOTS[texId];
-    super(tex, 'Box');
+class Bullet extends Actor {
+  canEverTick = true;
 
-    this.addAnim('a', tex.length === 1 ? [0] : [2, 1, 0], { speed: 8 });
-    this.play('a');
+  constructor({ texId, dir, speed }) {
+    super();
+
+    let tex = TEXTURES.SHOOTS[texId];
+
+    this.initAnimation({
+      textures: tex,
+      anims: [
+        { name: 'a', frames: tex.length === 1 ? [0] : [2, 1, 0], settings: { speed: 8 } }
+      ],
+    });
+    this.sprite.play('a');
+
+    this.initBody({
+      shape: 'Box',
+      collisionGroup: GROUPS.ME_DMG,
+      collideAgainst: [GROUPS.SOLID, GROUPS.FOE, GROUPS.FOE_DMG],
+      collide: this.collide,
+    });
 
     this.speed = speed || 40;
     this.atk = 1;
 
     this.shotType = texId;
 
-    this.position.copy(pos);
     this.rotation = dir.angle();
-    this.velocity.copy(dir).multiply(this.speed);
-    this.collisionGroup = GROUPS.ME_DMG;
-    this.collideAgainst = [GROUPS.SOLID, GROUPS.FOE, GROUPS.FOE_DMG];
-    this.body.collide = this.collide;
-    this.body.parent = this;
+    this.body.velocity.copy(dir).multiply(this.speed);
   }
   update() {
     if (this.position.x < this.scene.camera.left - this.sprite.width ||
@@ -83,14 +93,16 @@ class Bullet extends AnimatedActor {
   }
 
   collide(other) {
-    other.parent.receiveDamage(this.parent.atk);
-    this.parent.remove();
-
     // Effect
     effect(SHOT_FX_MAP[this.parent.shotType], this.position.x, this.position.y)
-      .addTo(this.parent.parent);
-
+      .addTo(this.parent.scene.actLayer);
     audio.sounds['hit'].play();
+
+    // Apply damage to target
+    other.parent.receiveDamage(this.parent.atk);
+
+    // Remove from the scene
+    this.parent.remove();
   }
 }
 
@@ -139,8 +151,7 @@ class Weapon {
     this.emitPoint
       .copy(this.dir).multiply(this.offset)
       .add(this.ship.position);
-    new Bullet(this.shotTex, this.emitPoint, this.dir, this.speed)
-      .addTo(this.ship.scene, this.ship.scene.actLayer);
+    this.ship.scene.spawnActor(Bullet, this.emitPoint.x, this.emitPoint.y, 'actLayer', { texId: this.shotTex, dir: this.dir, speed: this.speed });
 
     audio.sounds['shoot'].play();
 
@@ -177,14 +188,37 @@ class HealthHUD {
   }
 }
 
-export default class Ship extends AnimatedActor {
+export default class Ship extends Actor {
+  canEverTick = true;
+
   constructor() {
-    super(TEXTURES.SHIP, 'Circle');
+    super();
 
-    this.addAnim('a', [0]);
-    this.addAnim('flash', [0, 1], { speed: 8 });
+    // Setup animation
+    this.initAnimation({
+      textures: TEXTURES.SHIP,
+      anims: [
+        { name: 'a', frames: [0] },
+        { name: 'flash', frames: [0, 1], settings: { speed: 8 } },
+      ],
+    });
 
-    // States
+    // Setup physics
+    this.initBody({
+      shape: 'Circle',
+      damping: 0.85,
+      collisionGroup: GROUPS.ME,
+      collideAgainst: [GROUPS.SOLID],
+      collide: (other, res) => {
+        if (other.collisionGroup === GROUPS.SOLID) {
+          this.body.velocity.add(res.overlapN.clone().multiply(8));
+          return true;
+        }
+      },
+    });
+    this.body.velocityLimit.set(20);
+  }
+  prepare() {
     this.weapon = {
       left: new Weapon(this, LEFT).setup(LV1),
       right: new Weapon(this, RIGHT).setup(LV1),
@@ -192,38 +226,18 @@ export default class Ship extends AnimatedActor {
       down: new Weapon(this, DOWN).setup(LV1),
     };
 
-    // Setup physics
-    this.body.parent = this;
-    this.velocityLimit.set(20);
-    this.damping = 0.85;
-
-    this.collisionGroup = GROUPS.ME;
-    this.collideAgainst = [GROUPS.SOLID];
-    this.body.collide = (other, res) => {
-      if (other.collisionGroup === GROUPS.SOLID) {
-        this.velocity.add(res.overlapN.clone().multiply(8));
-        return true;
-      }
-    };
-  }
-  addTo(scene, layer) {
-    super.addTo(scene, layer);
-    this.play('a');
-
-    new Health({
+    this.behave(Health, {
         startHealth: 12,
         maxHealth: 12,
         damageInvincibleTime: 2000,
       })
-      .addTo(this, scene)
       .on('kill', this.destroy, this)
-      .on('receiveDamage', this.beginFlash, this)
-      .activate();
+      .on('receiveDamage', this.beginFlash, this);
 
-    this.hud = new HealthHUD(this.Health)
+    this.hud = new HealthHUD(this.behaviors['Health'])
       .addTo(this.scene);
 
-    return this;
+    this.sprite.play('a');
   }
   update(dt) {
     if (this.health <= 0) return;
@@ -250,33 +264,33 @@ export default class Ship extends AnimatedActor {
   shoot(dir) {
     if (dir.x < 0) {
       if (this.weapon.left.fire()) {
-        this.velocity.x = this.weapon.left.push;
+        this.body.velocity.x = this.weapon.left.push;
       }
     }
     if (dir.x > 0) {
       if (this.weapon.right.fire()) {
-        this.velocity.x = -this.weapon.right.push;
+        this.body.velocity.x = -this.weapon.right.push;
       }
     }
     if (dir.y < 0) {
       if (this.weapon.up.fire()) {
-        this.velocity.y = this.weapon.up.push;
+        this.body.velocity.y = this.weapon.up.push;
       }
     }
     if (dir.y > 0) {
       if (this.weapon.down.fire()) {
-        this.velocity.y = -this.weapon.down.push;
+        this.body.velocity.y = -this.weapon.down.push;
       }
     }
   }
   beginFlash() {
-    this.play('flash');
-    Timer.later(this.Health.damageInvincibleTime, this.endFlash, this);
+    this.sprite.play('flash');
+    Timer.later(this.behaviors['Health'].damageInvincibleTime, this.endFlash, this);
 
     this.scene.camera.shake(4, 40, 2, false);
   }
   endFlash() {
-    this.play('a');
+    this.sprite.play('a');
   }
 
   destroy() {

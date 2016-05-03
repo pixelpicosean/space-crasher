@@ -75,7 +75,7 @@ class Space extends Scene {
     session.on('score', this.updateScore, this);
 
     // Ship
-    this.ship = new Ship().addTo(this, this.actLayer);
+    this.ship = this.spawnActor(Ship, 0, 0, 'actLayer');
     this.camera.setTarget(this.ship.sprite);
 
     // Start to spawn meteors
@@ -96,8 +96,7 @@ class Space extends Scene {
 
   spawnMeteor() {
     if (this.meteorCount < METEOR_MAX) {
-      let m = new Meteor(rnd.between(this.left, this.right), rnd.between(this.top, this.bottom))
-        .addTo(this, this.actLayer)
+      let m = this.spawnActor(Meteor, rnd.between(this.left, this.right), rnd.between(this.top, this.bottom), 'actLayer')
         .once('destroy', this.meteorDestroyed, this);
       this.meteors.push(m);
 
