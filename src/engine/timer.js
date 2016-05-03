@@ -2,36 +2,58 @@ var Scene = require('engine/scene');
 var utils = require('engine/utils');
 
 /**
-  @class Timer
-  @constructor
-  @param {Number} [ms]
-**/
+ * Timer constructor should not be used directly, use the static methods instead:
+ *
+ * - {@link Timer.later}
+ * - {@link Timer.laterSec}
+ * - {@link Timer.interval}
+ * - {@link Timer.intervalSec}
+ *
+ * @class Timer
+ *
+ * @constructor
+ * @param {number} [ms]
+ */
 function Timer(ms) {
   /**
-   * @property {Number} _count
+   * @type {number}
    * @private
    */
   this._count = 0;
 
   /**
-   * Duration of this timer
-   * @property {Number} duration
+   * Duration of this timer.
+   * @type {number}
+   * @default 0
    */
   this.duration = 0;
 
   /**
-   * Whether this timer should repeat
-   * @type {Boolean}
+   * Whether this timer should repeat.
+   * @type {boolean}
+   * @default false
    */
   this.repeat = false;
 
   /**
-   * Whether this timer is already removed
-   * @type {Boolean}
+   * Whether this timer is already removed.
+   * @type {boolean}
+   * @protected
+   * @default false
    */
   this.removed = false;
 
+  /**
+   * Callback
+   * @type {function}
+   * @private
+   */
   this.callback = null;
+  /**
+   * Callback context
+   * @type {object}
+   * @private
+   */
   this.callbackCtx = null;
 
   this.set(ms);
@@ -39,8 +61,9 @@ function Timer(ms) {
 
 /**
  * Set duration for timer.
- * @param {Number} ms
- * @chainable
+ * @method set
+ * @memberof Timer#
+ * @param {number} ms
  */
 Timer.prototype.set = function set(ms) {
   if (typeof ms !== 'number') {
@@ -55,7 +78,7 @@ Timer.prototype.set = function set(ms) {
 /**
  * Reset timer to current duration.
  * @method reset
- * @chainable
+ * @memberof Timer#
  */
 Timer.prototype.reset = function reset() {
   this.removed = false;
@@ -66,7 +89,7 @@ Timer.prototype.reset = function reset() {
 /**
  * Pause timer.
  * @method pause
- * @chainable
+ * @memberof Timer#
  */
 Timer.prototype.pause = function pause() {
   this.paused = true;
@@ -76,13 +99,20 @@ Timer.prototype.pause = function pause() {
 /**
  * Resume paused timer.
  * @method resume
- * @chainable
+ * @memberof Timer#
  */
 Timer.prototype.resume = function resume() {
   this.paused = false;
   return this;
 };
 
+/**
+ * Update method that is called by timer system.
+ * @method update
+ * @memberof Timer#
+ * @protected
+ * @param  {number} delta Delta time
+ */
 Timer.prototype.update = function update(delta) {
   if (this.removed || this.paused) return;
 
@@ -104,7 +134,8 @@ Timer.prototype.update = function update(delta) {
 };
 
 /**
- * @property {Number} elapsed Time elapsed since start.
+ * @property {number} elapsed Time elapsed since start.
+ * @readonly
  */
 Object.defineProperty(Timer.prototype, 'elapsed', {
   get: function() {
@@ -113,7 +144,8 @@ Object.defineProperty(Timer.prototype, 'elapsed', {
 });
 
 /**
- * @property {Number} left Time left till the end.
+ * @property {number} left Time left till the end.
+ * @readonly
  */
 Object.defineProperty(Timer.prototype, 'left', {
   get: function() {
@@ -121,7 +153,11 @@ Object.defineProperty(Timer.prototype, 'left', {
   },
 });
 
-// Pool timer instances
+/**
+ * Timer instance pool
+ * @type {array<Timer>}
+ * @private
+ */
 var pool = [];
 function createTimer(ms) {
   var t = pool.pop();
@@ -141,18 +177,21 @@ function recycleTimer(timer) {
 Object.assign(Timer, {
   /**
    * Delta since last frame (ms).
-   * @attribute {Number} delta
+   * @memberof Timer
+   * @type {number}
    */
   delta: 0,
   /**
    * A cumulative number represents how long has passed since the
    * game is launched (in milliseconds).
-   * @type {Number}
+   * @memberof Timer
+   * @type {number}
    */
   now: 0,
   /**
    * Map of timers
-   * @type {Object}
+   * @memberof Timer
+   * @type {object}
    */
   timers: {
     '0': [],
@@ -161,7 +200,9 @@ Object.assign(Timer, {
   deactiveTags: [],
   /**
    * Update timer system.
-   * @attribute {Number} update
+   * @memberof Timer
+   * @method update
+   * @protected
    */
   update: function update(delta) {
     this.delta = delta;
@@ -187,10 +228,12 @@ Object.assign(Timer, {
 
   /**
    * Create an one-shoot timer.
-   * @param {Number} wait        Time in milliseconds
-   * @param {Function}  callback  Callback function to run, when timer ends
-   * @param {Object}    context   Context of the callback to be invoked
-   * @param {String}    tag       Tag of this timer, default is '0'
+   * @memberof Timer
+   * @method later
+   * @param {number}    wait      Time in milliseconds
+   * @param {function}  callback  Callback function to run, when timer ends
+   * @param {object}    context   Context of the callback to be invoked
+   * @param {string}    tag       Tag of this timer, default is '0'
    * @return {Timer}
    */
   later: function later(wait, callback, context, tag) {
@@ -217,6 +260,8 @@ Object.assign(Timer, {
   },
   /**
    * Create an one-shoot timer while the time is in seconds instead.
+   * @memberof Timer
+   * @method laterSec
    * @see Timer.later
    */
   laterSec: function laterSec(wait, callback, context, tag) {
@@ -225,10 +270,12 @@ Object.assign(Timer, {
 
   /**
    * Create a repeat timer.
-   * @param {Number} interval    Time in milliseconds
-   * @param {Function}  callback  Callback function to run, when timer ends
-   * @param {Object}    context   Context of the callback to be invoked
-   * @param {String}    tag       Tag of this timer, default is '0'
+   * @memberof Timer
+   * @method interval
+   * @param {number}    interval  Time in milliseconds
+   * @param {function}  callback  Callback function to run, when timer ends
+   * @param {object}    context   Context of the callback to be invoked
+   * @param {string}    tag       Tag of this timer, default is '0'
    * @return {Timer}
    */
   interval: function interval(interval, callback, context, tag) {
@@ -255,6 +302,8 @@ Object.assign(Timer, {
   },
   /**
    * Create a repeat timer while the time is in seconds instead.
+   * @memberof Timer
+   * @method intervalSec
    * @see Timer.interval
    */
   intervalSec: function intervalSec(interval, callback, context, tag) {
@@ -263,12 +312,20 @@ Object.assign(Timer, {
 
   /**
    * Remove a timer.
+   * @memberof Timer
+   * @method remove
    * @param {Timer} timer
    */
   remove: function remove(timer) {
     if (timer) timer.removed = true;
   },
 
+  /**
+   * Pause timers with a specific tag.
+   * @memberof Timer
+   * @method pauseTimersTagged
+   * @param  {string} tag
+   */
   pauseTimersTagged: function pauseTimersTagged(tag) {
     if (this.timers[tag]) {
       utils.removeItems(this.activeTags, this.activeTags.indexOf(tag), 1);
@@ -278,6 +335,12 @@ Object.assign(Timer, {
     return this;
   },
 
+  /**
+   * Resume timers with a specific tag.
+   * @memberof Timer
+   * @method resumeTimersTagged
+   * @param  {string} tag
+   */
   resumeTimersTagged: function resumeTimersTagged(tag) {
     if (this.timers[tag]) {
       utils.removeItems(this.deactiveTags, this.deactiveTags.indexOf(tag), 1);
@@ -288,4 +351,11 @@ Object.assign(Timer, {
   },
 });
 
+/**
+ * @exports engine/timer
+ * @see Timer
+ *
+ * @requires engine/scene
+ * @requires engine/utils
+ */
 module.exports = Timer;

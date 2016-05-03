@@ -2,6 +2,8 @@
  * Utility functions and constant variables
  *
  * Some utils come from [playground] and [supermix]
+ *
+ * @module engine/utils
  */
 
 // Math
@@ -100,12 +102,12 @@ exports.rgb2hex = function rgb2hex(rgb) {
  * If same key appears multiple times the final value
  * will come from last argument that contains it.
  *
- * @returns first argument
+ * @return {Object} first argument
  *
  * Examples:
  *
- *     merge({ a: { var_1: 1 } }, { a: { var_1: 2 } });
- *     // returns { a: { var_1: 2 } }
+ *   merge({ a: { var_1: 1 } }, { a: { var_1: 2 } });
+ *   return { a: { var_1: 2 } }
  */
 exports.merge = function merge(a) {
   var a = 0, b, key, value;

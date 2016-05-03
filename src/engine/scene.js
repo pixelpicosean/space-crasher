@@ -1,26 +1,33 @@
+/**
+ * @module engine/scene
+ */
+
 var EventEmitter = require('engine/eventemitter3');
 var engine = require('engine/core');
 var utils = require('engine/utils');
 var config = require('game/config').default;
 
 /**
-  Game scene.
-  @class Scene
-**/
+ * Scene is the main hub for a game. A game made with LesserPanda
+ * is a combination of different scenes(menu, shop, game, game-over .etc).
+ * @class Scene
+ * @constructor
+ * @extends {EvenetEmitter}
+ */
 function Scene() {
   EventEmitter.call(this);
 
   /**
-    Desired FPS this scene should run
-    @attribute {Number} desiredFPS
-    @default 30
-  **/
+   * Desired FPS this scene should run
+   * @property {Number} desiredFPS
+   * @default 30
+   */
   this.desiredFPS = config.desiredFPS || 30;
 
   /**
-    @property {Array} updateOrder
-    @private
-  **/
+   * @property {Array} updateOrder
+   * @private
+   */
   this.updateOrder = [];
 
   var i, name, sys;
@@ -99,29 +106,65 @@ Scene.prototype._freeze = function _freeze() {
   }
 };
 
+/**
+ * Awake is called when this scene is activated.
+ * @method awake
+ */
 Scene.prototype.awake = function awake() {};
+/**
+ * PreUpdate is called at the beginning of each frame
+ * @method preUpdate
+ */
 Scene.prototype.preUpdate = function preUpdate() {};
+/**
+ * Update is called each frame, right after `preUpdate`.
+ * @method update
+ */
 Scene.prototype.update = function update() {};
+/**
+ * PostUpdate is called at the end of each frame, right after `update`.
+ * @method postUpdate
+ */
 Scene.prototype.postUpdate = function postUpdate() {};
+/**
+ * Freeze is called when this scene is deactivated(switched to another one)
+ */
 Scene.prototype.freeze = function freeze() {};
 
+/**
+ * System pause callback.
+ */
 Scene.prototype.pause = function pause() {};
+/**
+ * System resume callback.
+ */
 Scene.prototype.resume = function resume() {};
 
 Object.assign(Scene, {
+  /**
+   *  @property desiredFPS
+   * @default 30
+   */
   desiredFPS: config.desiredFPS || 30,
 
   systems: {},
   /**
    * System updating order
-   * @attribute {Array} updateOrder
+   *  @property {Array} updateOrder
    */
   updateOrder: [
-    'Object',
+    'Actor',
     'Animation',
     'Physics',
     'Renderer',
   ],
+  /**
+   * Register a new sub-system.
+   * @memberOf Scene
+   * @static
+   * @param  {String} name
+   * @param  {Object} system
+   */
   registerSystem: function registerSystem(name, system) {
     if (Scene.systems[name]) console.log('Warning: override [' + name + '] system!');
 
@@ -129,84 +172,146 @@ Object.assign(Scene, {
   },
 });
 
-// Object system --------------------------------------------
+// Actor system --------------------------------------------
 Object.assign(Scene.prototype, {
   /**
-   * Add object to scene, so it's `update()` function get's called every frame.
-   * @method addObject
-   * @param {Object} object Object you want to add
-   * @param {String} tag    Tag of this object, default is '0'
+   * Spawn an Actor to this scene
+   * @method spawnActor
+   * @memberOf Scene
+   * @param  {Actor} actor      Actor class
+   * @param  {Number} x
+   * @param  {Number} y
+   * @param  {String} layerName Name of the layer to add to(key of a PIXI.Container instance in this scene)
+   * @param  {Object} settings  Custom settings
+   * @param  {String} [settings.name] Name of this actor
+   * @param  {String} [settings.tag]  Tag of this actor
+   * @return {Actor}            Actor instance
    */
-  addObject: function addObject(object, tag) {
-    var t = tag || '0';
+  spawnActor: function spawnActor(actor, x, y, layerName, settings) {
+    var settings_ = settings || {};
 
-    if (!this.objectSystem.objects[t]) {
-      // Create a new object list
-      this.objectSystem.objects[t] = [];
-
-      // Active new tag by default
-      this.objectSystem.activeTags.push(t);
+    if (!this[layerName]) {
+      console.log('Layer ' + layerName + ' does not exist!');
+      return null;
     }
 
-    if (this.objectSystem.objects[t].indexOf(object) < 0) {
-      object.removed = false;
-      this.objectSystem.objects[t].push(object);
+    var a = new actor(settings_).addTo(this, this[layerName]);
+    a.position.set(x, y);
+    this.addActor(a, settings_.tag);
+
+    if (settings_.name) {
+      a.name = settings_.name;
+      this.namedActors[settings_.name] = a;
+    }
+
+    return a;
+  },
+
+  /**
+   * Add actor to this scene, so its `update()` function gets called every frame.
+   * @method addActor
+   * @memberOf Scene
+   * @param {Actor} actor   Actor you want to add
+   * @param {String} tag    Tag of this actor, default is '0'
+   */
+  addActor: function addActor(actor, tag) {
+    var t = tag || '0';
+
+    actor.tag = t;
+
+    if (!this.actorSystem.actors[t]) {
+      // Create a new actor list
+      this.actorSystem.actors[t] = [];
+
+      // Active new tag by default
+      this.actorSystem.activeTags.push(t);
+    }
+
+    if (this.actorSystem.actors[t].indexOf(actor) < 0) {
+      actor.removed = false;
+      this.actorSystem.actors[t].push(actor);
     }
   },
 
   /**
-   * Remove object from scene.
-   * @method removeObject
-   * @param {Object} object
+   * Remove actor from scene.
+   * @method removeActor
+   * @memberOf Scene
+   * @param {Actor} actor
    */
-  removeObject: function removeObject(object) {
-    if (object) object.removed = true;
+  removeActor: function removeActor(actor) {
+    // Will remove in next frame
+    if (actor) actor.removed = true;
+
+    // Remove name based reference
+    if (actor.name) {
+      if (this.actorSystem.namedActors[actor.name] === actor) {
+        this.actorSystem.namedActors[actor.name] = null;
+      }
+    }
   },
 
-  pauseObjectsTagged: function pauseObjectsTagged(tag) {
-    if (this.objectSystem.objects[tag]) {
-      utils.removeItems(this.objectSystem.activeTags, this.objectSystem.activeTags.indexOf(tag), 1);
-      this.objectSystem.deactiveTags.push(tag);
+  /**
+   * Pause actors with a specific tag.
+   * @param  {String} tag
+   */
+  pauseActorsTagged: function pauseActorsTagged(tag) {
+    if (this.actorSystem.actors[tag]) {
+      utils.removeItems(this.actorSystem.activeTags, this.actorSystem.activeTags.indexOf(tag), 1);
+      this.actorSystem.deactiveTags.push(tag);
     }
 
     return this;
   },
 
-  resumeObjectsTagged: function resumeObjectsTagged(tag) {
-    if (this.objectSystem.objects[tag]) {
-      utils.removeItems(this.objectSystem.deactiveTags, this.objectSystem.deactiveTags.indexOf(tag), 1);
-      this.objectSystem.activeTags.push(tag);
+  /**
+   * Resume actors with a specific tag.
+   * @param  {String} tag
+   */
+  resumeActorsTagged: function resumeActorsTagged(tag) {
+    if (this.actorSystem.actors[tag]) {
+      utils.removeItems(this.actorSystem.deactiveTags, this.actorSystem.deactiveTags.indexOf(tag), 1);
+      this.actorSystem.activeTags.push(tag);
     }
 
     return this;
   },
 });
 
-Scene.registerSystem('Object', {
+Scene.registerSystem('Actor', {
   init: function init(scene) {
     /**
-     * Object system runtime data storage
+     * Actor system runtime data storage
      */
-    scene.objectSystem = {
+    scene.actorSystem = {
       activeTags: ['0'],
       deactiveTags: [],
-      objects: {
+      actors: {
         '0': [],
       },
+      namedActors: {},
     };
   },
   update: function update(scene, deltaMS, deltaSec) {
-    var i, key, objects;
-    for (key in scene.objectSystem.objects) {
-      if (scene.objectSystem.activeTags.indexOf(key) < 0) continue;
+    var i, key, actors, actor;
+    for (key in scene.actorSystem.actors) {
+      if (scene.actorSystem.activeTags.indexOf(key) < 0) continue;
 
-      objects = scene.objectSystem.objects[key];
-      for (i = 0; i < objects.length; i++) {
-        if (!objects[i].removed) {
-          objects[i].update(deltaMS, deltaSec);
+      actors = scene.actorSystem.actors[key];
+      for (i = 0; i < actors.length; i++) {
+        actor = actors[i];
+
+        if (!actor.removed) {
+          if (actor.behaviorList.length > 0) {
+            actor.updateBehaviors(deltaMS, deltaSec);
+          }
+          if (actor.canEverTick) {
+            actor.update(deltaMS, deltaSec);
+          }
         }
-        if (objects[i].removed) {
-          utils.removeItems(objects, i--, 1);
+
+        if (actor.removed) {
+          utils.removeItems(actors, i--, 1);
         }
       }
     }
